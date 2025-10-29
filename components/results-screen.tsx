@@ -106,12 +106,23 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
                 ))}
               </ul>
             </Card>
+            <div className='mt-4 flex items-center justify-center'>
+              <div className='flex items-center gap-2 px-4 py-2 bg-[#FFF7ED] border border-[#F3E8D2] rounded-lg text-xs text-[#92400e] font-medium shadow-sm'>
+                {/* <span className='text-lg' aria-label='info'>
+                  ℹ️
+                </span> */}
+                <span>
+                  This analysis is for informational purposes only and not a
+                  substitute for professional dermatological advice.
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
         <Button
           onClick={handleReset}
-          className='w-full mt-8 bg-[#FFA94D] hover:bg-[#FF9933] text-white font-semibold py-3 rounded-lg'
+          className='w-full mt-4 bg-[#FFA94D] hover:bg-[#FF9933] text-white font-semibold py-3 rounded-lg'
         >
           Analyze Another Cream
         </Button>
