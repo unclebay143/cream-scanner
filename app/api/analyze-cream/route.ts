@@ -3,8 +3,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MongoClient } from "mongodb";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
-const MONGODB_DB = "cream-scanner";
-const MONGODB_COLLECTION = "analyzed-cream";
+const MONGODB_DB = process.env.MONGODB_DB!;
+const MONGODB_COLLECTION = process.env.MONGODB_COLLECTION!;
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const model = genAI.getGenerativeModel({
