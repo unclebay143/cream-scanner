@@ -53,6 +53,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <script
+        defer
+        data-website-id={process.env.NEXT_PUBLIC_DATA_FAST_WEBSITE_ID}
+        data-domain='creamscanner.com'
+        src='https://datafa.st/js/script.js'
+      ></script>
       <body className='font-sans antialiased'>
         <div className={`flex flex-col min-h-screen bg-[#FFA94D]/10`}>
           <Header />
