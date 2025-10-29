@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
+import { Suspense } from "react";
 import { Footer } from "@/components/footer";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -55,7 +56,15 @@ export default function RootLayout({
       <body className='font-sans antialiased'>
         <div className={`flex flex-col min-h-screen bg-[#FFA94D]/10`}>
           <Header />
-          {children}
+          <Suspense
+            fallback={
+              <div className='flex justify-center items-center grow h-auto'>
+                Loading...
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
           <Footer />
         </div>
       </body>

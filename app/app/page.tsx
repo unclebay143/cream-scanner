@@ -6,7 +6,6 @@ import ResultsScreen from "@/components/results-screen";
 import UploadScreen from "@/components/upload-screen";
 import ManualIngredientsForm from "../../components/manual-ingredients-form";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
 interface AnalysisResult {
   grade: string;
@@ -26,7 +25,7 @@ interface AnalysisResult {
 }
 
 export default function Page() {
-  const [manualModalOpen, setManualModalOpen] = useState(true); // always open for inline view
+  const [manualModalOpen, setManualModalOpen] = useState(true);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     null
   );
@@ -34,7 +33,6 @@ export default function Page() {
   const mode = param.get("mode");
   const [currentMode, setCurrentMode] = useState<string | null>(mode);
 
-  // On mount, check localStorage for result if mode is 'result'
   useEffect(() => {
     if (currentMode === "result") {
       const stored = localStorage.getItem("creamAnalysisResult");
@@ -104,25 +102,23 @@ export default function Page() {
   };
 
   return (
-    <Suspense fallback={<div className="flex justify-center items-center grow h-auto">Loading...</div>}>
-      <main className='flex justify-center items-center grow h-auto'>
-        {!analysisResult && currentMode === "manual" && (
-          <ManualIngredientsForm
-            open={manualModalOpen}
-            setOpen={setManualModalOpen}
-            onSubmit={handleAnalyze}
-            isLoading={isLoading}
-          />
-        )}
+    <main className='flex justify-center items-center grow h-auto'>
+      {!analysisResult && currentMode === "manual" && (
+        <ManualIngredientsForm
+          open={manualModalOpen}
+          setOpen={setManualModalOpen}
+          onSubmit={handleAnalyze}
+          isLoading={isLoading}
+        />
+      )}
 
-        {!analysisResult && currentMode === "upload" && (
-          <UploadScreen onImageUpload={handleAnalyze} isLoading={isLoading} />
-        )}
+      {!analysisResult && currentMode === "upload" && (
+        <UploadScreen onImageUpload={handleAnalyze} isLoading={isLoading} />
+      )}
 
-        {analysisResult && currentMode === "result" && (
-          <ResultsScreen result={analysisResult} onReset={handleReset} />
-        )}
-      </main>
-    </Suspense>
+      {analysisResult && currentMode === "result" && (
+        <ResultsScreen result={analysisResult} onReset={handleReset} />
+      )}
+    </main>
   );
 }
