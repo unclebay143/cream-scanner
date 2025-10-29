@@ -19,7 +19,7 @@ export default function Header() {
 
         {/* GitHub Star Button */}
         <a
-          href='https://github.com'
+          href='https://github.com/unclebay143/cream-scanner'
           target='_blank'
           rel='noopener noreferrer'
           className='flex items-center gap-2 px-4 py-2 bg-[#FFA94D] hover:bg-[#FF9933] text-white rounded-lg font-medium transition-colors'

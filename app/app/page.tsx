@@ -6,6 +6,7 @@ import ResultsScreen from "@/components/results-screen";
 import UploadScreen from "@/components/upload-screen";
 import ManualIngredientsForm from "../../components/manual-ingredients-form";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 interface AnalysisResult {
   grade: string;
@@ -103,23 +104,25 @@ export default function Page() {
   };
 
   return (
-    <main className='flex justify-center items-center grow h-auto'>
-      {!analysisResult && currentMode === "manual" && (
-        <ManualIngredientsForm
-          open={manualModalOpen}
-          setOpen={setManualModalOpen}
-          onSubmit={handleAnalyze}
-          isLoading={isLoading}
-        />
-      )}
+    <Suspense fallback={<div className="flex justify-center items-center grow h-auto">Loading...</div>}>
+      <main className='flex justify-center items-center grow h-auto'>
+        {!analysisResult && currentMode === "manual" && (
+          <ManualIngredientsForm
+            open={manualModalOpen}
+            setOpen={setManualModalOpen}
+            onSubmit={handleAnalyze}
+            isLoading={isLoading}
+          />
+        )}
 
-      {!analysisResult && currentMode === "upload" && (
-        <UploadScreen onImageUpload={handleAnalyze} isLoading={isLoading} />
-      )}
+        {!analysisResult && currentMode === "upload" && (
+          <UploadScreen onImageUpload={handleAnalyze} isLoading={isLoading} />
+        )}
 
-      {analysisResult && currentMode === "result" && (
-        <ResultsScreen result={analysisResult} onReset={handleReset} />
-      )}
-    </main>
+        {analysisResult && currentMode === "result" && (
+          <ResultsScreen result={analysisResult} onReset={handleReset} />
+        )}
+      </main>
+    </Suspense>
   );
 }
