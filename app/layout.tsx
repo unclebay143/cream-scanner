@@ -19,6 +19,8 @@ export const metadata: Metadata = {
     "cream analyzer",
     "ingredient scanner",
     "AI skincare",
+    "cream scanner",
+    "AI cream scanner",
     "Gemini AI",
     "toxicity",
     "allergy",
@@ -31,13 +33,13 @@ export const metadata: Metadata = {
     title: "Cream Scanner | AI Ingredient Analyzer",
     description:
       "Scan skincare creams and analyze ingredients for safety, risks, and recommendations using Gemini AI.",
-    url: "https://cream-scanner.app",
+    url: "https://www.creamscanner.com",
     siteName: "Cream Scanner",
     images: [
       {
         url: "/og-image.png",
-        width: 1200,
-        height: 630,
+        width: 2400,
+        height: 1260,
         alt: "Cream Scanner AI Results",
       },
     ],
@@ -53,13 +55,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <script
-        defer
-        data-website-id={process.env.NEXT_PUBLIC_DATA_FAST_WEBSITE_ID}
-        data-domain='creamscanner.com'
-        src='https://datafa.st/js/script.js'
-      ></script>
       <body className='font-sans antialiased'>
+        <script
+          defer
+          data-website-id={process.env.NEXT_PUBLIC_DATA_FAST_WEBSITE_ID}
+          data-domain='creamscanner.com'
+          src='https://datafa.st/js/script.js'
+        ></script>
         <div className={`flex flex-col min-h-screen bg-[#FFA94D]/10`}>
           <Header />
           <Suspense
