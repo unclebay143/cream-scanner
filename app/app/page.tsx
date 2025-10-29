@@ -1,28 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useEffect } from "react";
-import ResultsScreen from "@/components/results-screen";
+import ResultsScreen, { AnalysisResult } from "@/components/results-screen";
 import UploadScreen from "@/components/upload-screen";
 import ManualIngredientsForm from "../../components/manual-ingredients-form";
 import { useSearchParams } from "next/navigation";
-
-interface AnalysisResult {
-  grade: string;
-  verdict: string;
-  ingredients: Array<{
-    name: string;
-    description: string;
-    safety: "safe" | "caution" | "avoid";
-  }>;
-  risks: {
-    allergyRisk: number;
-    toxicity: number;
-    chemicalSensitivity: number;
-    comedogenicity: number;
-  };
-  recommendations: string[];
-}
+import { motion } from "framer-motion";
 
 export default function Page() {
   const [manualModalOpen, setManualModalOpen] = useState(true);
@@ -31,7 +15,19 @@ export default function Page() {
   );
   const param = useSearchParams();
   const mode = param.get("mode");
+
   const [currentMode, setCurrentMode] = useState<string | null>(mode);
+  const [isLoading, setIsLoading] = useState(false);
+  const analysisTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const isLoadingRef = useRef(false);
+
+  const switchScreenModeTo = (screen: "upload" | "result") => {
+    const url = new URL(window.location.href);
+    setCurrentMode(screen);
+    url.searchParams.set("mode", screen);
+    window.history.replaceState({}, "", url.toString());
+  };
 
   useEffect(() => {
     if (currentMode === "result") {
@@ -40,16 +36,28 @@ export default function Page() {
         try {
           setAnalysisResult(JSON.parse(stored));
         } catch {}
+      } else {
+        switchScreenModeTo("upload");
       }
     }
-  }, [currentMode]);
 
-  const [isLoading, setIsLoading] = useState(false);
+    if (!currentMode) {
+      switchScreenModeTo("upload");
+    }
+  }, [currentMode]);
 
   const handleAnalyze = async (input: File[] | string) => {
     let res, data;
     try {
       setIsLoading(true);
+      isLoadingRef.current = true;
+
+      analysisTimeoutRef.current = setTimeout(() => {
+        if (isLoadingRef.current) {
+          setShowToast(true);
+        }
+      }, 10000);
+
       if (Array.isArray(input)) {
         // Image upload
         if (!input || input.length === 0) return;
@@ -78,31 +86,70 @@ export default function Page() {
       } else {
         setAnalysisResult(data);
         localStorage.setItem("creamAnalysisResult", JSON.stringify(data));
-        setCurrentMode("result");
-        // Update the URL query param for mode
-        const url = new URL(window.location.href);
-        url.searchParams.set("mode", "result");
-        window.history.replaceState({}, "", url.toString());
+        switchScreenModeTo("result");
       }
     } catch (err) {
       setAnalysisResult(null);
       alert("Failed to analyze");
     } finally {
       setIsLoading(false);
+      isLoadingRef.current = false;
+      setShowToast(false);
     }
   };
 
   const handleReset = () => {
     setAnalysisResult(null);
-    setCurrentMode(null);
-    // Clear mode from URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete("mode");
-    window.history.replaceState({}, "", url.toString());
+    switchScreenModeTo("upload");
   };
 
   return (
-    <main className='flex justify-center items-center grow h-auto'>
+    <main className='flex flex-col relative justify-center items-center grow h-auto'>
+      {showToast && (
+        <motion.div
+          initial={{ scale: 0.96, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.96, opacity: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className='w-full absolute top-0 left-0 px-3 z-50'
+        >
+          <div
+            className='max-w-lg mx-auto mt-6 mb-2 px-6 py-4 rounded-2xl text-center flex flex-col items-center gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-[#facc15]'
+            style={{ background: "#fff7ed", color: "#92400e" }}
+          >
+            <div className='flex items-center gap-2 mb-1'>
+              <span className='inline-flex h-3 w-3 rounded-full bg-[#facc15] animate-dot-pulse'></span>
+              <span className='font-semibold text-base tracking-wide'>
+                We&apos;re scanning your cream... hang tight 🌿
+              </span>
+            </div>
+            <div className='text-sm font-medium opacity-80'>
+              ...this may take up to a minute during high traffic.
+            </div>
+
+            <style jsx>{`
+              @keyframes dotPulse {
+                0% {
+                  opacity: 0.3;
+                  transform: scale(1);
+                }
+                50% {
+                  opacity: 1;
+                  transform: scale(1.3);
+                }
+                100% {
+                  opacity: 0.3;
+                  transform: scale(1);
+                }
+              }
+              .animate-dot-pulse {
+                animation: dotPulse 1.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+              }
+            `}</style>
+          </div>
+        </motion.div>
+      )}
+
       {!analysisResult && currentMode === "manual" && (
         <ManualIngredientsForm
           open={manualModalOpen}

@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import { Suspense } from "react";
 import { Footer } from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "Cream Scanner",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://www.creamscanner.com/og-image.png",
         width: 2400,
         height: 1260,
         alt: "Cream Scanner AI Results",
@@ -72,6 +73,7 @@ export default function RootLayout({
             }
           >
             {children}
+            <Toaster />
           </Suspense>
           <Footer />
         </div>

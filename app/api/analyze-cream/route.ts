@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       ingredientsText = body.ingredientsText || "";
       isManual = true;
-      prompt = `You are a skincare expert analyzing a cream product. Based on the following list of ingredients, analyze the product and provide a detailed assessment.\n\nIngredients: ${ingredientsText}\n\nPlease provide your analysis in the following JSON format:\n{\n  \"grade\": \"A-F grade\",\n  \"verdict\": \"One sentence verdict about the cream\",\n  \"ingredients\": [\n    {\n      \"name\": \"ingredient name\",\n      \"description\": \"brief description of what it does\",\n      \"safety\": \"safe|caution|avoid\"\n    }\n  ],\n  \"risks\": {\n    \"allergyRisk\": 0-100,\n    \"toxicity\": 0-100,\n    \"chemicalSensitivity\": 0-100,\n    \"comedogenicity\": 0-100\n  },\n  \"recommendations\": [\n    \"recommendation 1\",\n    \"recommendation 2\"\n  ]\n}\n\nProvide only valid JSON, no additional text.`;
+      prompt = `You are a skincare expert analyzing a cream product. Based on the following list of ingredients, analyze the product and provide a detailed assessment.\n\nIngredients: ${ingredientsText}\n\nPlease provide your analysis in the following JSON format:\n{\n  \"grade\": \"A-F grade\",\n  \"verdict\": \"One sentence verdict about the cream\",\n  \"ingredients\": [\n    {\n      \"name\": \"ingredient name\",\n      \"description\": \"brief description of what it does\",\n      \"safety\": \"safe|caution|avoid\"\n    }\n  ],\n  \"risks\": {\n    \"allergyRisk\": 0-100,\n    \"toxicity\": 0-100,\n    \"chemicalSensitivity\": 0-100,\n    \"comedogenicity\": 0-100\n  },\n  \"recommendations\": [\n    \"recommendation 1\",\n    \"recommendation 2\"\n  ],\n  \"confidence\": \"0-100 (how confident you are in this analysis, as a percentage)\"\n}\n\nProvide only valid JSON, no additional text.`;
       contents = [prompt];
     } else {
       // Image upload
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
           };
         })
       );
-      prompt = `You are a skincare expert analyzing cream product images. Based on the provided images of a skincare cream, analyze the ingredients and provide a detailed assessment.\n\nPlease provide your analysis in the following JSON format:\n{\n  \"grade\": \"A-F grade\",\n  \"verdict\": \"One sentence verdict about the cream\",\n  \"ingredients\": [\n    {\n      \"name\": \"ingredient name\",\n      \"description\": \"brief description of what it does\",\n      \"safety\": \"safe|caution|avoid\"\n    }\n  ],\n  \"risks\": {\n    \"allergyRisk\": 0-100,\n    \"toxicity\": 0-100,\n    \"chemicalSensitivity\": 0-100,\n    \"comedogenicity\": 0-100\n  },\n  \"recommendations\": [\n    \"recommendation 1\",\n    \"recommendation 2\"\n  ]\n}\n\nProvide only valid JSON, no additional text.`;
+      prompt = `You are a skincare expert analyzing cream product images. Based on the provided images of a skincare cream, analyze the ingredients and provide a detailed assessment.\n\nPlease provide your analysis in the following JSON format:\n{\n  \"grade\": \"A-F grade\",\n  \"verdict\": \"One sentence verdict about the cream\",\n  \"ingredients\": [\n    {\n      \"name\": \"ingredient name\",\n      \"description\": \"brief description of what it does\",\n      \"safety\": \"safe|caution|avoid\"\n    }\n  ],\n  \"risks\": {\n    \"allergyRisk\": 0-100,\n    \"toxicity\": 0-100,\n    \"chemicalSensitivity\": 0-100,\n    \"comedogenicity\": 0-100\n  },\n  \"recommendations\": [\n    \"recommendation 1\",\n    \"recommendation 2\"\n  ],\n  \"confidence\": \"0-100 (how confident you are in this analysis, as a percentage)\"\n}\n\nProvide only valid JSON, no additional text.`;
       contents = [prompt, ...imageParts];
     }
 
@@ -93,7 +93,10 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Analysis error:", error);
     return NextResponse.json(
-      { error: "Failed to analyze cream" },
+      {
+        error:
+          "Sorry, we couldn't analyze your cream right now due to high demand. Please try again in a few minutes.",
+      },
       { status: 500 }
     );
   }

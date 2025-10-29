@@ -7,9 +7,10 @@ import { motion } from "framer-motion";
 import IngredientBreakdown from "./ingredient-breakdown";
 import RiskMeters from "./risk-meters";
 
-interface AnalysisResult {
+export interface AnalysisResult {
   grade: string;
   verdict: string;
+  confidence: string | number;
   ingredients: Array<{
     name: string;
     description: string;
@@ -38,9 +39,12 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
     chemicalSensitivity: 0,
     comedoGenicity: 0,
   };
+  const confidence =
+    typeof result.confidence === "number"
+      ? result.confidence
+      : parseInt(result.confidence || "0", 10);
 
   const handleReset = () => {
-    // Clear result from localStorage when starting a new analysis
     localStorage.removeItem("creamAnalysisResult");
     onReset();
   };
@@ -58,7 +62,11 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <GradeCard grade={result.grade} verdict={result.verdict} />
+          <GradeCard
+            grade={result.grade}
+            verdict={result.verdict}
+            confidence={confidence}
+          />
         </motion.div>
 
         <div className='mt-8'>

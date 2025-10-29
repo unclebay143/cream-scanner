@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 interface GradeCardProps {
   grade: string;
   verdict: string;
+  confidence: number;
 }
 
 const gradeColors: Record<string, { bg: string; text: string; emoji: string }> =
@@ -16,7 +17,11 @@ const gradeColors: Record<string, { bg: string; text: string; emoji: string }> =
     F: { bg: "bg-red-100", text: "text-red-700", emoji: "🔴" },
   };
 
-export default function GradeCard({ grade, verdict }: GradeCardProps) {
+export default function GradeCard({
+  grade,
+  verdict,
+  confidence,
+}: GradeCardProps) {
   const gradeBase = grade.charAt(0);
   const colors = gradeColors[gradeBase] || gradeColors["C"];
 
@@ -29,6 +34,16 @@ export default function GradeCard({ grade, verdict }: GradeCardProps) {
         Grade: {grade}
       </h2>
       <p className={`text-lg mx-auto ${colors.text}`}>{verdict}</p>
+
+      {/* Confidence meter */}
+      {confidence > 0 && (
+        <div className='mt-4mb-2 flex flex-col items-center'>
+          <span className='text-xs text-[#666]'>
+            Analysis confidence:{" "}
+            <span className='font-semibold text-[#222]'>{confidence}%</span>
+          </span>
+        </div>
+      )}
     </Card>
   );
 }
