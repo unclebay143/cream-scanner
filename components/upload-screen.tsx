@@ -1,12 +1,14 @@
 "use client";
 
 import type React from "react";
+import { CameraCapture } from "./upload-screen/CameraCapture";
+import { UploadOptions } from "./upload-screen/UploadOptions";
+import { ImageGrid } from "./upload-screen/ImageGrid";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface UploadScreenProps {
   onUpload?: () => void;
@@ -17,11 +19,25 @@ interface UploadScreenProps {
 export default function UploadScreen({
   onUpload,
   onImageUpload,
-  isLoading = true,
+  isLoading,
 }: UploadScreenProps) {
   const [images, setImages] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [previewActive, setPreviewActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // UI state variables for clarity
+  const showCamera = cameraActive;
+  const showPreview = previewActive && !!capturedImage;
+  const showCameraVideo = cameraActive && !previewActive;
+  const showUploadOptions =
+    !cameraActive && !previewActive && images.length === 0;
+  const showImageGrid = !cameraActive && !previewActive && images.length > 0;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -56,11 +72,135 @@ export default function UploadScreen({
     setImages(combined);
   };
 
+  // Camera logic
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const startCamera = async () => {
+    setCameraActive(true);
+    setCameraError(null);
+    setTimeout(async () => {
+      if (videoRef.current) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          videoRef.current.srcObject = stream;
+          streamRef.current = stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+          };
+        } catch (err) {
+          setCameraError(
+            "Unable to access camera. Please check permissions and try again."
+          );
+          setCameraActive(false);
+        }
+      }
+    }, 100);
+  };
+
+  const stopCamera = () => {
+    setCameraActive(false);
+    setCameraError(null);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg");
+        setCapturedImage(dataUrl);
+        setPreviewActive(true);
+        stopCamera(); // Stop camera immediately after capture
+      }
+    }
+  };
+
+  const useCapturedImage = () => {
+    if (capturedImage) {
+      // Convert dataURL to File
+      fetch(capturedImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], `captured-${images.length + 1}.jpg`, {
+            type: "image/jpeg",
+          });
+          addImages([file]);
+          setCapturedImage(null);
+          setPreviewActive(false);
+          // If less than 3 images, keep camera open for next capture
+          if (images.length + 1 < 3) {
+            setCameraActive(true);
+            setTimeout(async () => {
+              if (videoRef.current) {
+                try {
+                  const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                  });
+                  videoRef.current.srcObject = stream;
+                  streamRef.current = stream;
+                  videoRef.current.onloadedmetadata = () => {
+                    videoRef.current?.play();
+                  };
+                } catch (err) {
+                  setCameraError(
+                    "Unable to access camera. Please check permissions and try again."
+                  );
+                  setCameraActive(false);
+                }
+              }
+            }, 100);
+          } else {
+            stopCamera();
+          }
+        });
+    }
+  };
+
+  const discardCapturedImage = () => {
+    setCapturedImage(null);
+    setPreviewActive(false);
+    setCameraActive(true);
+    setTimeout(async () => {
+      if (videoRef.current) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          videoRef.current.srcObject = stream;
+          streamRef.current = stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+          };
+        } catch (err) {
+          setCameraError(
+            "Unable to access camera. Please check permissions and try again."
+          );
+          setCameraActive(false);
+        }
+      }
+    }, 100);
+  };
+
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
   const handleAnalyze = () => {
+    stopCamera();
+
     if (images.length > 0) {
       if (onImageUpload) {
         onImageUpload(images);
@@ -81,7 +221,7 @@ export default function UploadScreen({
         </div>
 
         <Card
-          className={`p-8 relative w-full border-2 border-dashed transition-colors min-h-[400px] flex flex-col items-center justify-center ${
+          className={`p-8 relative w-full border-2 border-dashed transition-colors min-h-[468px] flex flex-col items-center justify-center ${
             dragActive
               ? "border-[#FFA94D] bg-orange-50"
               : "border-[#E0E0E0] bg-white"
@@ -91,192 +231,40 @@ export default function UploadScreen({
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          {images.length === 0 ? (
-            <div className='text-center'>
-              <div className='text-5xl mb-4'>📷</div>
-              <h2 className='text-lg font-semibold text-[#222] mb-1'>
-                Take a photo
-              </h2>
-              <p className='text-sm text-[#666] mb-2'>and upload</p>
-
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className='inline-block px-6 py-2 bg-[#FFA94D] hover:bg-[#FF9933] text-white font-semibold rounded-lg transition-colors'
-              >
-                Choose Image
-              </button>
-
-              <input
-                ref={fileInputRef}
-                type='file'
-                multiple
-                accept='image/*'
-                onChange={handleFileSelect}
-                className='hidden'
-              />
-
-              <p className='text-xs text-[#999] mt-4'>or drag and drop</p>
-            </div>
-          ) : (
-            <div className='w-full flex flex-col justify-between grow gap-4'>
-              {isLoading && (
-                <div className='absolute left-0 top-0 w-full h-full pointer-events-none z-10 flex items-center justify-center'>
-                  <div className='relative w-full h-full'>
-                    <div
-                      className='absolute left-0 w-full'
-                      style={{
-                        animation:
-                          "scanY 1.2s cubic-bezier(.4,0,.2,1) infinite alternate",
-                      }}
-                    >
-                      <div className='mx-auto w-full h-2 bg-linear-to-r from-[#FFA94D] via-[#FF9933] to-[#FFA94D] shadow-lg opacity-80' />
-                    </div>
-                  </div>
-                </div>
-              )}
-              <style jsx global>{`
-                @keyframes scanY {
-                  0% {
-                    top: 7%;
-                  }
-                  100% {
-                    top: 92%;
-                  }
-                }
-              `}</style>
-              <div
-                className={cn(
-                  "w-full grow flex",
-                  images.length === 1 && "flex-col",
-                  images.length === 2 && "flex-col md:flex-row gap-3",
-                  images.length === 3 && "grid grid-cols-2 gap-3"
-                )}
-              >
-                {images.length === 1 && (
-                  <div className='relative w-full'>
-                    <img
-                      src={URL.createObjectURL(images[0]) || "/placeholder.svg"}
-                      alt={`Upload 1`}
-                      className={cn(
-                        "w-full h-68 object-cover rounded-lg",
-                        isLoading && "h-[332px]"
-                      )}
-                    />
-                    {isLoading && (
-                      <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
-                    )}
-                    <button
-                      onClick={() => removeImage(0)}
-                      className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-red-600'
-                      disabled={isLoading}
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
-                {images.length === 2 &&
-                  images.map((img, idx) => (
-                    <div key={idx} className='relative md:w-1/2'>
-                      <img
-                        src={URL.createObjectURL(img) || "/placeholder.svg"}
-                        alt={`Upload ${idx + 1}`}
-                        className={`w-full h-40 md:h-[332px] object-cover rounded-lg`}
-                      />
-                      {isLoading && (
-                        <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
-                      )}
-                      <button
-                        onClick={() => removeImage(idx)}
-                        className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-red-600'
-                        disabled={isLoading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                {images.length === 3 && (
-                  <>
-                    <div className='relative col-span-2'>
-                      <img
-                        src={
-                          URL.createObjectURL(images[0]) || "/placeholder.svg"
-                        }
-                        alt={`Upload 1`}
-                        className={`w-full h-60 object-cover rounded-lg`}
-                      />
-                      {isLoading && (
-                        <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
-                      )}
-                      <button
-                        onClick={() => removeImage(0)}
-                        className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-red-600'
-                        disabled={isLoading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <div className='relative'>
-                      <img
-                        src={
-                          URL.createObjectURL(images[1]) || "/placeholder.svg"
-                        }
-                        alt={`Upload 2`}
-                        className={`w-full h-24 object-cover rounded-lg`}
-                      />
-                      {isLoading && (
-                        <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
-                      )}
-                      <button
-                        onClick={() => removeImage(1)}
-                        className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-red-600'
-                        disabled={isLoading}
-                      >
-                        X
-                      </button>
-                    </div>
-                    <div className='relative'>
-                      <img
-                        src={
-                          URL.createObjectURL(images[2]) || "/placeholder.svg"
-                        }
-                        alt={`Upload 3`}
-                        className={`w-full h-24 object-cover rounded-lg`}
-                      />
-                      {isLoading && (
-                        <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
-                      )}
-                      <button
-                        onClick={() => removeImage(2)}
-                        className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold hover:bg-red-600'
-                        disabled={isLoading}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-              {isLoading || (
-                <button
-                  disabled={images.length >= 3 || isLoading}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={cn(
-                    "w-full py-2 border border-[#E0E0E0] text-[#222] font-semibold rounded-lg hover:bg-[#F5F5F5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-                    images.length === 3 && "hidden"
-                  )}
-                >
-                  Add More
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type='file'
-                multiple
-                accept='image/*'
-                onChange={handleFileSelect}
-                className='hidden'
-              />
-            </div>
+          {(showCamera || previewActive) && (
+            <CameraCapture
+              previewActive={previewActive}
+              capturedImage={capturedImage}
+              cameraError={cameraError}
+              showCameraVideo={showCameraVideo}
+              showPreview={showPreview}
+              imagesCount={images.length}
+              videoRef={videoRef}
+              canvasRef={canvasRef}
+              onCapturePhoto={capturePhoto}
+              onStopCamera={stopCamera}
+              onUseCapturedImage={useCapturedImage}
+              onDiscardCapturedImage={discardCapturedImage}
+            />
+          )}
+          {showUploadOptions && (
+            <UploadOptions
+              onChooseImage={() => fileInputRef.current?.click()}
+              onUseCamera={startCamera}
+              fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
+              onFileSelect={handleFileSelect}
+            />
+          )}
+          {showImageGrid && (
+            <ImageGrid
+              images={images}
+              isLoading={isLoading}
+              onRemoveImage={removeImage}
+              onChooseImage={() => fileInputRef.current?.click()}
+              onUseCamera={startCamera}
+              fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
+              onFileSelect={handleFileSelect}
+            />
           )}
         </Card>
 
@@ -286,7 +274,7 @@ export default function UploadScreen({
             className={`w-full mt-6 bg-[#FFA94D] hover:bg-[#FF9933] text-white font-semibold py-3 rounded-lg flex items-center justify-center ${
               isLoading ? "opacity-70 cursor-not-allowed" : ""
             }`}
-            disabled={isLoading}
+            disabled={isLoading || cameraActive || previewActive}
           >
             {isLoading ? (
               <span className='flex items-center justify-center gap-2'>
