@@ -197,7 +197,7 @@ export default function UploadScreen({
   };
 
   return (
-    <div className='py-8 px-4 w-full'>
+    <div className='px-4 w-full'>
       <div className='max-w-lg mx-auto w-full'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-[#222] mb-2'>Scan Cream</h1>

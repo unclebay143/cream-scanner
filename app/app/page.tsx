@@ -114,19 +114,19 @@ export default function Page() {
           className='w-full absolute top-0 left-0 px-3 z-50'
         >
           <div
-            className='max-w-lg mx-auto mt-6 mb-2 px-6 py-4 rounded-2xl text-center flex flex-col items-center gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-[#facc15]'
+            className='max-w-lg w-full mx-auto mt-6 mb-2 px-4 py-3 sm:px-6 sm:py-4 rounded-2xl text-center flex flex-col items-center sm:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-[#facc15]'
             style={{ background: "#fff7ed", color: "#92400e" }}
           >
-            <div className='flex items-center gap-2 mb-1'>
-              <span className='inline-flex h-3 w-3 rounded-full bg-[#facc15] animate-dot-pulse'></span>
-              <span className='font-semibold text-base tracking-wide'>
-                Still scanning your cream... hang tight 🌿
+            <div className='flex items-start sm:items-center gap-2 mb-1'>
+              <span className='mt-0.5 sm:mt-0 inline-flex h-3 w-3 rounded-full bg-[#facc15] animate-dot-pulse'></span>
+              <span className='font-semibold text-xs sm:text-base tracking-wide'>
+                Still scanning your cream...
+                <br className='sm:hidden' /> hang tight 🌿
               </span>
             </div>
-            <div className='text-sm font-medium opacity-80'>
+            <div className='text-xs sm:text-sm font-medium opacity-80'>
               ...this may take up to a minute during high traffic.
             </div>
-
             <style jsx>{`
               @keyframes dotPulse {
                 0% {
