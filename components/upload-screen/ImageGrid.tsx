@@ -132,25 +132,24 @@ export function ImageGrid({
           </>
         )}
       </div>
-      {isLoading ||
-        (images.length < 3 && (
-          <div className='flex flex-col sm:flex-row gap-3 w-full mt-2'>
-            <button
-              disabled={isLoading}
-              onClick={onChooseImage}
-              className='w-full py-2 border border-[#E0E0E0] text-[#222] font-semibold rounded-lg hover:bg-[#F5F5F5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              Choose Image
-            </button>
-            <button
-              disabled={isLoading}
-              onClick={onUseCamera}
-              className='w-full py-2 border border-[#FFE4C7] bg-[#FFF7ED] text-[#92400e] font-semibold rounded-lg hover:bg-[#FFE4C7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-            >
-              Use Camera
-            </button>
-          </div>
-        ))}
+      {!isLoading && images.length < 3 && (
+        <div className='flex flex-col sm:flex-row gap-3 w-full mt-2'>
+          <button
+            disabled={isLoading}
+            onClick={onChooseImage}
+            className='w-full py-2 border border-[#E0E0E0] text-[#222] font-semibold rounded-lg hover:bg-[#F5F5F5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            Choose Image
+          </button>
+          <button
+            disabled={isLoading}
+            onClick={onUseCamera}
+            className='w-full py-2 border border-[#FFE4C7] bg-[#FFF7ED] text-[#92400e] font-semibold rounded-lg hover:bg-[#FFE4C7] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            Use Camera
+          </button>
+        </div>
+      )}
       <input
         ref={fileInputRef}
         type='file'

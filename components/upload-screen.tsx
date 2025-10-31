@@ -21,18 +21,19 @@ export default function UploadScreen({
   onImageUpload,
   isLoading,
 }: UploadScreenProps) {
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [images, setImages] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null | undefined>(
+    undefined
+  );
   const [previewActive, setPreviewActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // UI state variables for clarity
-  const showCamera = cameraActive;
   const showPreview = previewActive && !!capturedImage;
   const showCameraVideo = cameraActive && !previewActive;
   const showUploadOptions =
@@ -72,30 +73,34 @@ export default function UploadScreen({
     setImages(combined);
   };
 
-  // Camera logic
-  const [cameraError, setCameraError] = useState<string | null>(null);
+  const initCamera = async () => {
+    if (videoRef.current) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play();
+        };
+        return true;
+      } catch (err) {
+        setCameraError(
+          "Unable to access camera. Please check permissions and try again."
+        );
+        setCameraActive(false);
+        return false;
+      }
+    }
+    return false;
+  };
 
   const startCamera = async () => {
     setCameraActive(true);
     setCameraError(null);
-    setTimeout(async () => {
-      if (videoRef.current) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
-          videoRef.current.srcObject = stream;
-          streamRef.current = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play();
-          };
-        } catch (err) {
-          setCameraError(
-            "Unable to access camera. Please check permissions and try again."
-          );
-          setCameraActive(false);
-        }
-      }
+    setTimeout(() => {
+      initCamera();
     }, 100);
   };
 
@@ -143,24 +148,8 @@ export default function UploadScreen({
           // If less than 3 images, keep camera open for next capture
           if (images.length + 1 < 3) {
             setCameraActive(true);
-            setTimeout(async () => {
-              if (videoRef.current) {
-                try {
-                  const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                  });
-                  videoRef.current.srcObject = stream;
-                  streamRef.current = stream;
-                  videoRef.current.onloadedmetadata = () => {
-                    videoRef.current?.play();
-                  };
-                } catch (err) {
-                  setCameraError(
-                    "Unable to access camera. Please check permissions and try again."
-                  );
-                  setCameraActive(false);
-                }
-              }
+            setTimeout(() => {
+              initCamera();
             }, 100);
           } else {
             stopCamera();
@@ -173,24 +162,8 @@ export default function UploadScreen({
     setCapturedImage(null);
     setPreviewActive(false);
     setCameraActive(true);
-    setTimeout(async () => {
-      if (videoRef.current) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
-          videoRef.current.srcObject = stream;
-          streamRef.current = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play();
-          };
-        } catch (err) {
-          setCameraError(
-            "Unable to access camera. Please check permissions and try again."
-          );
-          setCameraActive(false);
-        }
-      }
+    setTimeout(() => {
+      initCamera();
     }, 100);
   };
 
@@ -231,7 +204,7 @@ export default function UploadScreen({
           onDragOver={handleDrag}
           onDrop={handleDrop}
         >
-          {(showCamera || previewActive) && (
+          {(cameraActive || previewActive) && (
             <CameraCapture
               previewActive={previewActive}
               capturedImage={capturedImage}

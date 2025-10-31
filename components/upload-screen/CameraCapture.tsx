@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
+import React from "react";
 
 interface CameraCaptureProps {
   previewActive: boolean;
-  capturedImage: string | null;
+  capturedImage: string | null | undefined;
   cameraError: string | null;
   showCameraVideo: boolean;
   showPreview: boolean;
