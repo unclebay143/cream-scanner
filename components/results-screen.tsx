@@ -57,6 +57,15 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
       <Confetti
         width={typeof window !== "undefined" ? window.innerWidth : 1200}
         height={typeof window !== "undefined" ? window.innerHeight : 800}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none",
+          zIndex: 1000,
+        }}
         recycle={false}
         colors={["#FFA94D"]}
       />
