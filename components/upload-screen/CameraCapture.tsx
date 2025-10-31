@@ -51,7 +51,7 @@ export function CameraCapture({
         </div>
       )}
       {showCameraVideo && !cameraError && (
-        <div className='flex gap-4 mt-4 w-full'>
+        <div className='flex flex-col sm:flex-row gap-3 w-full mt-4'>
           <button
             onClick={onCapturePhoto}
             disabled={!!capturedImage || imagesCount >= 3}
