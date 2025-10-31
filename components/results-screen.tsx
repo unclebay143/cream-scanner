@@ -54,14 +54,12 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
 
   return (
     <div className='py-8 px-4'>
-      {/* {showConfetti && ( */}
       <Confetti
         width={typeof window !== "undefined" ? window.innerWidth : 1200}
         height={typeof window !== "undefined" ? window.innerHeight : 800}
         recycle={false}
         colors={["#FFA94D"]}
       />
-      {/* )} */}
       <div className='max-w-2xl mx-auto'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-[#222] mb-2'>Your Results</h1>
