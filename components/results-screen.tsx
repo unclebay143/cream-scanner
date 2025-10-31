@@ -1,9 +1,11 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import GradeCard from "./grade-card";
 import { motion } from "framer-motion";
+import Confetti from "react-confetti";
 import IngredientBreakdown from "./ingredient-breakdown";
 import RiskMeters from "./risk-meters";
 
@@ -31,6 +33,7 @@ interface ResultsScreenProps {
 }
 
 export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
+  const [showConfetti, setShowConfetti] = useState(true);
   const recommendations = result?.recommendations || [];
   const ingredients = result?.ingredients || [];
   const risks = result?.risks || {
@@ -51,6 +54,12 @@ export default function ResultsScreen({ result, onReset }: ResultsScreenProps) {
 
   return (
     <div className='py-8 px-4'>
+      <Confetti
+        width={typeof window !== "undefined" ? window.innerWidth : 1200}
+        height={typeof window !== "undefined" ? window.innerHeight : 800}
+        recycle={false}
+        colors={["#FFA94D"]}
+      />
       <div className='max-w-2xl mx-auto'>
         <div className='text-center mb-8'>
           <h1 className='text-3xl font-bold text-[#222] mb-2'>Your Results</h1>
