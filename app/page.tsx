@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -21,19 +22,19 @@ export default function Home() {
           Upload a photo of your skincare cream and get instant ingredient
           analysis with safety ratings.
         </p>
-        <div className='space-y-3'>
-          <button
+        <div className='space-y-3 flex flex-col w-full'>
+          <Link
+            href='/app?mode=upload'
             className='w-full bg-[#FFA94D] hover:bg-[#FF9933] text-white font-semibold py-3 rounded-lg text-base transition-colors'
-            onClick={() => router.push("/app?mode=upload")}
           >
             Scan Cream
-          </button>
-          <button
+          </Link>
+          <Link
             className='w-full border-2 border-[#E0E0E0] text-[#222] font-semibold py-3 rounded-lg text-base bg-white hover:bg-white/75 transition-colors'
-            onClick={() => router.push("/app?mode=manual")}
+            href='/app?mode=manual'
           >
             Enter Manually
-          </button>
+          </Link>
         </div>
       </div>
     </main>

@@ -77,7 +77,7 @@ export default function UploadScreen({
     if (videoRef.current) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { facingMode: { exact: "environment" } },
         });
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
@@ -86,11 +86,24 @@ export default function UploadScreen({
         };
         return true;
       } catch (err) {
-        setCameraError(
-          "Unable to access camera. Please check permissions and try again."
-        );
-        setCameraActive(false);
-        return false;
+        // fallback to default camera if environment is not available
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          videoRef.current.srcObject = stream;
+          streamRef.current = stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+          };
+          return true;
+        } catch (err2) {
+          setCameraError(
+            "Unable to access camera. Please check permissions and try again."
+          );
+          setCameraActive(false);
+          return false;
+        }
       }
     }
     return false;
