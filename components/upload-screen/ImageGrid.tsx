@@ -41,7 +41,7 @@ export function ImageGrid({
               alt={`Upload 1`}
               className={
                 "w-full h-[332px] object-cover rounded-lg" +
-                (isLoading ? " h-[332px]" : "")
+                (isLoading ? " h-[400px]" : "")
               }
             />
             {isLoading && (
@@ -62,7 +62,7 @@ export function ImageGrid({
               <img
                 src={URL.createObjectURL(img) || "/placeholder.svg"}
                 alt={`Upload ${idx + 1}`}
-                className='w-full h-40 md:h-[332px] object-cover rounded-lg'
+                className='w-full h-40 md:h-[400px] object-cover rounded-lg'
               />
               {isLoading && (
                 <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
@@ -99,7 +99,7 @@ export function ImageGrid({
               <img
                 src={URL.createObjectURL(images[1]) || "/placeholder.svg"}
                 alt={`Upload 2`}
-                className='w-full h-24 object-cover rounded-lg'
+                className='w-full h-36 object-cover rounded-lg'
               />
               {isLoading && (
                 <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
@@ -116,7 +116,7 @@ export function ImageGrid({
               <img
                 src={URL.createObjectURL(images[2]) || "/placeholder.svg"}
                 alt={`Upload 3`}
-                className='w-full h-24 object-cover rounded-lg'
+                className='w-full h-36 object-cover rounded-lg'
               />
               {isLoading && (
                 <div className='absolute inset-0 bg-white/40 animate-pulse flex items-center justify-center rounded-lg' />
