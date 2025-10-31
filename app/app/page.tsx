@@ -120,7 +120,7 @@ export default function Page() {
             <div className='flex items-center gap-2 mb-1'>
               <span className='inline-flex h-3 w-3 rounded-full bg-[#facc15] animate-dot-pulse'></span>
               <span className='font-semibold text-base tracking-wide'>
-                We&apos;re scanning your cream... hang tight 🌿
+                Still scanning your cream... hang tight 🌿
               </span>
             </div>
             <div className='text-sm font-medium opacity-80'>
